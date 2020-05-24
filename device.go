@@ -462,7 +462,42 @@ func (l belkinListener) Response(m gossdp.ResponseMessage) {
 		URN:        m.Urn,
 	})
 }
+
 func (l belkinListener) Tracef(fmt string, args ...interface{}) {}
 func (l belkinListener) Infof(fmt string, args ...interface{})  {}
 func (l belkinListener) Warnf(fmt string, args ...interface{})  {}
 func (l belkinListener) Errorf(fmt string, args ...interface{}) {}
+
+type belkinListenerWithCallback struct {
+	URN      string
+	Callback func(ScanResponse)
+}
+
+func (l belkinListenerWithCallback) Response(m gossdp.ResponseMessage) {
+	// example response
+	// urn:Belkin:device:insight:1
+	//{MaxAge:86400 SearchType:urn:Belkin:device:insight:1 DeviceId:Insight-1_0-231550K1200093 Usn:uuid:Insight-1_0-231550K1200093::urn:Belkin:device:insight:1 Location:http://10.22.22.1:49152/setup.xml Server:Unspecified, UPnP/1.0, Unspecified RawResponse:0xc208072120 Urn:urn:Belkin:device:insight:1}
+
+	//urn:Belkin:service:basicevent:1
+	//{MaxAge:86400 SearchType:urn:Belkin:service:basicevent:1 DeviceId:Insight-1_0-231550K1200093 Usn:uuid:Insight-1_0-231550K1200093::urn:Belkin:service:basicevent:1 Location:http://10.22.22.1:49152/setup.xml Server:Unspecified, UPnP/1.0, Unspecified RawResponse:0xc208072120 Urn:urn:Belkin:service:basicevent:1}
+
+	if m.SearchType != l.URN {
+		return
+	}
+
+	device := ScanResponse{
+		MaxAge:     m.MaxAge,
+		SearchType: m.SearchType,
+		DeviceID:   m.DeviceId,
+		USN:        m.Usn,
+		Location:   m.Location,
+		Server:     m.Server,
+		URN:        m.Urn,
+	}
+	l.Callback(device)
+}
+
+func (l belkinListenerWithCallback) Tracef(fmt string, args ...interface{}) {}
+func (l belkinListenerWithCallback) Infof(fmt string, args ...interface{})  {}
+func (l belkinListenerWithCallback) Warnf(fmt string, args ...interface{})  {}
+func (l belkinListenerWithCallback) Errorf(fmt string, args ...interface{}) {}

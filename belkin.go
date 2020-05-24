@@ -46,3 +46,30 @@ func Scan(dt DeviceType, waitTimeSeconds int) ([]*Device, error) {
 	}
 	return devices, nil
 }
+
+func ScanWithCallback(dt DeviceType, waitTimeSeconds int, callback func(Device)) error {
+
+	l := belkinListenerWithCallback{
+		URN: string(dt),
+		Callback: func(response ScanResponse) {
+			device := &Device{Scan: response}
+			go callback(*device)
+		},
+	}
+
+	c, err := gossdp.NewSsdpClientWithLogger(l, l)
+	if err != nil {
+		return fmt.Errorf("failed to start ssdp discovery client: %s", err)
+	}
+
+	defer c.Stop()
+	go c.Start()
+	err = c.ListenFor(string(dt))
+	if err != nil {
+		return fmt.Errorf("discovery failed: %s", err)
+	}
+
+	time.Sleep(time.Duration(waitTimeSeconds) * time.Second)
+
+	return nil
+}
