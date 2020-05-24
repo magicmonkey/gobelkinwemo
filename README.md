@@ -1,3 +1,5 @@
+_This is a fork of the version at `github.com/go-home-iot/belkin` and should be imported as `import belkin "github.com/magicmonkey/gobelkinwemo"`.  This fork adds a callback which gets called as soon as a device is discovered on the network, instead of waiting for the full timeout duration before returning any devices.  To use this, call `ScanWithCallback` instead of `Scan`_
+
 # belkin
 A golang library to scan and control Belkin devices, such as the WeMo Maker, WeMo Insight
 
