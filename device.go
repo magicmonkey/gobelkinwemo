@@ -42,6 +42,16 @@ type root struct {
 	Device *Device `xml:"device"`
 }
 
+// NewDeviceFromURL allows a device with a known IP to be loaded with a URL like http://1.2.3.4:49153/setup.xml
+func NewDeviceFromURL(location string, timeout time.Duration) (*Device, error) {
+	d := &Device{Scan: ScanResponse{Location: location}}
+	err := d.Load(timeout)
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
 // Load fetches all of the device specific information and updates the calling struct. The timeout
 // parameter specifies how long to wait to connect and get a response before giving up
 func (d *Device) Load(timeout time.Duration) error {
